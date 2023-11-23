@@ -1,7 +1,30 @@
 from django.http import HttpResponse, HttpResponseServerError
+from rest_framework import mixins, permissions, viewsets, status
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
+from .serializers import StorySerializer
 
 from .models import Story
 
+
+class StoriesViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
+    """Stories viewset. Only published stories are returned."""
+
+    queryset = Story.objects.all()
+    permission_classes = [permissions.AllowAny]
+    serializer_class = StorySerializer
+
+    def get_queryset(self):
+        """Get published stories."""
+
+        return Story.objects.published().order_by('-published_at').prefetch_related('StoryImages')
+
+class StoriesList(APIView):
+    def get(self, request):
+        story = Story.objects.all()
+        serialized_users = StorySerializer(story, many=True)
+        return Response(serialized_users.data, status=status.HTTP_200_OK)
 
 def list_stories(request):
     """Method for show all story."""

@@ -22,7 +22,7 @@ from . import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('add-story/', views.add_story),
-    path('list-stories/', views.list_stories, name='list-stories'),
+    path('list-stories/', views.StoriesList.as_view()),
     path('story/', views.get_story),
     # re_path(r'story/(?P<story_id>)\d+', views.get_story),
 ]

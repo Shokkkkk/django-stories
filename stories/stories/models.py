@@ -1,4 +1,18 @@
 from django.db import models
+from django.utils import timezone
+
+
+class StoryManager(models.Manager):
+    """Custom manager for stories."""
+
+    def published(self) -> models.query.QuerySet['Story']:
+        """
+        Filter out unpublished stories.
+        Story is considered published if it has a published_at date set,
+        and it's less than current date
+        """
+
+        return self.filter(published_at__isnull=False, published_at__lt=timezone.now())
 
 class Story(models.Model):
     """Model for stories."""
@@ -15,9 +29,11 @@ class Story(models.Model):
         verbose_name = 'story'
         verbose_name_plural = 'stories'
 
-class StoryImages(models.Model):
-    """Model for stories images."""
-    story = models.ForeignKey(Story, on_delete=models.PROTECT)
+
+class StoryUploadedFiles(models.Model):
+    """Stories images mtm through model."""
+    story = models.ForeignKey('Story', models.CASCADE)
+    # uploaded_file = models.ForeignKey('files.UploadedFile', models.CASCADE)
     image_1 = models.ImageField()
     image_2 = models.ImageField()
     image_3 = models.ImageField()
@@ -25,3 +41,14 @@ class StoryImages(models.Model):
     image_5 = models.ImageField()
     image_6 = models.ImageField()
     image_7 = models.ImageField()
+
+    class Meta:
+        # constraints = [
+        #     models.UniqueConstraint(
+        #         fields=['story', 'uploaded_file'],
+        #         name='unique_story_uploaded_file',
+        #     ),
+        # ]
+        verbose_name = 'story image'
+        verbose_name_plural = 'story image'
+        ordering = ('-id',)
